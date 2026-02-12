@@ -291,7 +291,7 @@
         }
       } else {
         if (c === '"') inQuotes = true;
-        else if (c === ",") { row.push(field); field = ""; }
+        else if (c === "," || c === "\t") { row.push(field); field = ""; }
         else if (c === "\r") { /* ignore */ }
         else if (c === "\n") {
           row.push(field); field = "";
