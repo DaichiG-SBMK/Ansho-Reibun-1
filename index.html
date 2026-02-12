@@ -59,10 +59,6 @@
     transition:transform .08s ease, background .15s ease;
   }
   .btn:hover{ background:#e8f0fe; transform:translateY(-1px); }
-  .btn.small{
-    text-align:center;
-    font-weight:600;
-  }
 
   .card{
     background:var(--card);
@@ -197,7 +193,7 @@
 (() => {
   // ========= 設定 =========
   const CSV_PATH = "grammar.csv";
-  const STORAGE_KEY = "AnshoReibun_Grammar_Ch1_v1"; // 章ごとに分ける場合はここを変える
+  const STORAGE_KEY = "AnshoReibun_Grammar_Ch1_v1";
   const TOP_URL = "https://daichig-sbmk.github.io/Ansho-Reibun-top/";
   const PAGE_SIZE = 15;
 
@@ -221,20 +217,24 @@
   }
 
   function initStore() {
-    const obj = {
+    return {
       stats: {}, // id -> { wrong, seqShown, randShown, wrongRandShown, hardShown, lastRandRoundSeen }
       seqIndex: 0,
       seqRound: 0,
       seqChallenge: 0,
 
       randRound: 0,
-      randChallenge: 0
+      randChallenge: 0,
+
+      // ★追加：途中セッション（完走するまで回数を増やさない）
+      inProgress: {
+        seq: null,  // { ids, idx, startIndex, endIndex, willWrap, roundAtStart }
+        rand: null  // { ids, idx, useRound, advancedRoundTo }
+      }
     };
-    return obj;
   }
 
   function hydrateStore(obj) {
-    // 欠損キーを埋める（将来拡張用）
     if (!obj || typeof obj !== "object") return initStore();
     if (!obj.stats) obj.stats = {};
     if (typeof obj.seqIndex !== "number") obj.seqIndex = 0;
@@ -242,6 +242,11 @@
     if (typeof obj.seqChallenge !== "number") obj.seqChallenge = 0;
     if (typeof obj.randRound !== "number") obj.randRound = 0;
     if (typeof obj.randChallenge !== "number") obj.randChallenge = 0;
+
+    if (!obj.inProgress) obj.inProgress = { seq: null, rand: null };
+    if (!("seq" in obj.inProgress)) obj.inProgress.seq = null;
+    if (!("rand" in obj.inProgress)) obj.inProgress.rand = null;
+
     return obj;
   }
 
@@ -271,9 +276,8 @@
     return store.stats[id];
   }
 
-  // ========= CSV =========
+  // ========= CSV（カンマ/タブ対応） =========
   function parseCSV(text) {
-    // RFC4180に近い簡易パーサ（クォート対応）
     const rows = [];
     let row = [];
     let field = "";
@@ -295,7 +299,6 @@
         else if (c === "\r") { /* ignore */ }
         else if (c === "\n") {
           row.push(field); field = "";
-          // 空行はスキップ（ただし列がある場合は保持）
           if (row.some(v => v !== "")) rows.push(row);
           row = [];
         } else {
@@ -303,7 +306,6 @@
         }
       }
     }
-    // 最終行
     row.push(field);
     if (row.some(v => v !== "")) rows.push(row);
 
@@ -315,15 +317,14 @@
     if (!res.ok) throw new Error("grammar.csv を読み込めませんでした。");
     let text = await res.text();
 
-// BOM除去（UTF-8 with BOM対策）
-if (text.charCodeAt(0) === 0xFEFF) {
-  text = text.slice(1);
-}
+    // BOM除去（UTF-8 with BOM対策）
+    if (text.charCodeAt(0) === 0xFEFF) {
+      text = text.slice(1);
+    }
 
     const rows = parseCSV(text);
     if (rows.length === 0) throw new Error("CSVが空です。");
 
-    // ヘッダー確認（id,jp,model,alts）
     const header = rows[0].map(s => (s || "").trim());
     const idx = {
       id: header.indexOf("id"),
@@ -361,27 +362,17 @@ if (text.charCodeAt(0) === 0xFEFF) {
   // ========= 正規化 =========
   function normalizeAnswer(s) {
     if (s == null) return "";
-    // Unicode正規化（全角/半角など）
     let t = String(s).normalize("NFKC");
-
-    // アポストロフィ統一（’ など → '）
     t = t.replace(/[’‘`]/g, "'");
-
-    // 各種スペース→半角スペース
     t = t.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, " ");
-
-    // 余分な空白を整理（連続→1つ、両端トリム）
     t = t.replace(/\s+/g, " ").trim();
-
-    // 大文字小文字は区別しない
     t = t.toLowerCase();
-
     return t;
   }
 
   // ========= 出題ロジック =========
   function challengesPerRound() {
-    return Math.ceil(items.length / PAGE_SIZE);
+    return items.length ? Math.ceil(items.length / PAGE_SIZE) : 0;
   }
 
   function updateMenuLabels() {
@@ -391,31 +382,46 @@ if (text.charCodeAt(0) === 0xFEFF) {
     const btnSeq = document.getElementById("btnSeq");
     const btnRand = document.getElementById("btnRand");
 
-    btnSeq.textContent = `全部順番（${per}回で１周。現在${store.seqChallenge}回）`;
-    btnRand.textContent = `全部ランダム（${per}回で１周。現在${store.randChallenge}回）`;
+    const seqMid = store.inProgress?.seq ? "（途中あり）" : "";
+    const randMid = store.inProgress?.rand ? "（途中あり）" : "";
+
+    btnSeq.textContent = `全部順番（${per}回で１周。現在${store.seqChallenge}回）${seqMid}`;
+    btnRand.textContent = `全部ランダム（${per}回で１周。現在${store.randChallenge}回）${randMid}`;
   }
 
+  // ---- 全部順番：途中なら再開 / 完走で確定 ----
   function startSeqChallenge() {
     const store = loadStore();
     const n = items.length;
 
-    let start = store.seqIndex;
-    let end = Math.min(start + PAGE_SIZE, n);
-    const selected = items.slice(start, end).map(x => x.id);
-
-    // 表示回数カウント（この形式）
-    selected.forEach(id => statFor(store, id).seqShown++);
-
-    // 次回の開始位置
-    store.seqIndex = end;
-    store.seqChallenge++;
-
-    // 1周終了なら次周へ
-    if (store.seqIndex >= n) {
-      store.seqIndex = 0;
-      store.seqRound++;
+    // 途中があれば再開
+    if (store.inProgress?.seq) {
+      const p = store.inProgress.seq;
+      session = {
+        mode: "seq",
+        ids: p.ids,
+        idx: p.idx || 0,
+        total: p.ids.length,
+        answered: false
+      };
+      renderQuestion();
+      updateMenuLabels();
+      return;
     }
 
+    // 新規セット（回数は増やさない）
+    const start = store.seqIndex;
+    const end = Math.min(start + PAGE_SIZE, n);
+    const selected = items.slice(start, end).map(x => x.id);
+
+    store.inProgress.seq = {
+      ids: selected,
+      idx: 0,
+      startIndex: start,
+      endIndex: end,
+      willWrap: (end >= n),
+      roundAtStart: store.seqRound
+    };
     saveStore(store);
 
     session = {
@@ -429,29 +435,48 @@ if (text.charCodeAt(0) === 0xFEFF) {
     updateMenuLabels();
   }
 
-  function chooseRandSetForChallenge(store) {
-    const round = store.randRound;
+  function commitSeqIfAny() {
+    const store = loadStore();
+    const p = store.inProgress?.seq;
+    if (!p) return;
 
-    // 未出題（このラウンドでまだ出してないもの）を優先
+    // 完走したのでここで初めて確定
+    store.seqChallenge++;
+    store.seqIndex = p.endIndex;
+
+    // 表示回数は完走時にまとめて加算
+    p.ids.forEach(id => statFor(store, id).seqShown++);
+
+    if (p.willWrap) {
+      store.seqIndex = 0;
+      store.seqRound++;
+    }
+
+    store.inProgress.seq = null;
+    saveStore(store);
+  }
+
+  // ---- 全部ランダム：開始時は“計画だけ”。完走で確定 ----
+  function planRandSetForChallenge(store) {
+    const currentRound = store.randRound;
+
     let candidates = items
-      .filter(x => statFor(store, x.id).lastRandRoundSeen !== round)
+      .filter(x => statFor(store, x.id).lastRandRoundSeen !== currentRound)
       .map(x => x.id);
 
-    // もし全て出し終えたら新ラウンドへ
+    let useRound = currentRound;
+    let advancedRoundTo = null;
+
     if (candidates.length === 0) {
-      store.randRound++;
-      // round更新
-      const newRound = store.randRound;
+      useRound = currentRound + 1;
+      advancedRoundTo = useRound;
       candidates = items
-        .filter(x => statFor(store, x.id).lastRandRoundSeen !== newRound)
+        .filter(x => statFor(store, x.id).lastRandRoundSeen !== useRound)
         .map(x => x.id);
     }
 
-    // このチャレンジで出す数（残りが少なければ少ないまま）
     const count = Math.min(PAGE_SIZE, candidates.length);
 
-    // 優先規則：この形式での出題回数が少ない → 同じなら誤答回数が多い → その上でランダム
-    // ランダム性を入れるため、同順位内をシャッフルしつつソートのタイブレークに使用
     const randKey = new Map();
     candidates.forEach(id => randKey.set(id, Math.random()));
 
@@ -459,46 +484,79 @@ if (text.charCodeAt(0) === 0xFEFF) {
       const sa = statFor(store, a);
       const sb = statFor(store, b);
 
-      if (sa.randShown !== sb.randShown) return sa.randShown - sb.randShown; // 少ない優先
-      if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong; // 多い優先
+      if (sa.randShown !== sb.randShown) return sa.randShown - sb.randShown;
+      if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong;
       return (randKey.get(a) ?? 0) - (randKey.get(b) ?? 0);
     });
 
     const selected = candidates.slice(0, count);
-
-    // 選択したものを「このラウンドで出した」扱い
-    const useRound = store.randRound;
-    selected.forEach(id => {
-      const s = statFor(store, id);
-      s.randShown++;
-      s.lastRandRoundSeen = useRound;
-    });
-
-    return selected;
+    return { selected, useRound, advancedRoundTo };
   }
 
   function startRandChallenge() {
     const store = loadStore();
-    const selected = chooseRandSetForChallenge(store);
 
-    store.randChallenge++;
+    // 途中があれば再開
+    if (store.inProgress?.rand) {
+      const p = store.inProgress.rand;
+      session = {
+        mode: "rand",
+        ids: p.ids,
+        idx: p.idx || 0,
+        total: p.ids.length,
+        answered: false
+      };
+      renderQuestion();
+      updateMenuLabels();
+      return;
+    }
+
+    const plan = planRandSetForChallenge(store);
+
+    store.inProgress.rand = {
+      ids: plan.selected,
+      idx: 0,
+      useRound: plan.useRound,
+      advancedRoundTo: plan.advancedRoundTo
+    };
     saveStore(store);
 
     session = {
       mode: "rand",
-      ids: selected,
+      ids: plan.selected,
       idx: 0,
-      total: selected.length,
+      total: plan.selected.length,
       answered: false
     };
     renderQuestion();
     updateMenuLabels();
   }
 
+  function commitRandIfAny() {
+    const store = loadStore();
+    const p = store.inProgress?.rand;
+    if (!p) return;
+
+    store.randChallenge++;
+
+    if (typeof p.advancedRoundTo === "number") {
+      store.randRound = p.advancedRoundTo;
+    }
+
+    p.ids.forEach(id => {
+      const s = statFor(store, id);
+      s.randShown++;
+      s.lastRandRoundSeen = p.useRound;
+    });
+
+    store.inProgress.rand = null;
+    saveStore(store);
+  }
+
+  // ---- 誤答ランダム / 苦手10（従来通り：回数やinProgressとは無関係） ----
   function startWrongRandChallenge() {
     const store = loadStore();
 
-    // 学習記録対象の誤答（wrong>=1）だけ
     const pool = items
       .filter(x => statFor(store, x.id).wrong >= 1)
       .map(x => x.id);
@@ -512,7 +570,6 @@ if (text.charCodeAt(0) === 0xFEFF) {
     const randKey = new Map();
     pool.forEach(id => randKey.set(id, Math.random()));
 
-    // 優先規則：この形式での出題回数が少ない → 同じなら誤答回数が多い → その上でランダム
     pool.sort((a, b) => {
       const sa = statFor(store, a);
       const sb = statFor(store, b);
@@ -541,7 +598,6 @@ if (text.charCodeAt(0) === 0xFEFF) {
   function startHard10Challenge() {
     const store = loadStore();
 
-    // 累計誤答（学習記録のwrong）の上位10
     const withWrong = items
       .map(x => ({ id: x.id, wrong: statFor(store, x.id).wrong }))
       .filter(x => x.wrong >= 1);
@@ -554,7 +610,6 @@ if (text.charCodeAt(0) === 0xFEFF) {
     withWrong.sort((a,b) => b.wrong - a.wrong);
     const top = withWrong.slice(0, 10).map(x => x.id);
 
-    // ランダムに出題（最大10なので全部）
     shuffleInPlace(top);
 
     top.forEach(id => statFor(store, id).hardShown++);
@@ -622,14 +677,12 @@ if (text.charCodeAt(0) === 0xFEFF) {
     const input = document.getElementById("answerInput");
     const btn = document.getElementById("checkBtn");
 
-    // Enterで判定
     input.addEventListener("keydown", (e) => {
       if (e.key === "Enter") btn.click();
     });
 
     btn.addEventListener("click", () => checkAnswer());
 
-    // フォーカス
     setTimeout(() => input.focus(), 0);
   }
 
@@ -658,7 +711,6 @@ if (text.charCodeAt(0) === 0xFEFF) {
       }
     }
 
-    // 結果表示（入力は残し、編集不可に）
     inputEl.disabled = true;
     btn.disabled = true;
 
@@ -686,8 +738,24 @@ if (text.charCodeAt(0) === 0xFEFF) {
     if (!session) return;
     session.idx++;
 
+    // ★途中セッションのidxを保存（seq / rand のみ）
+    {
+      const store = loadStore();
+      if (session.mode === "seq" && store.inProgress?.seq) {
+        store.inProgress.seq.idx = session.idx;
+        saveStore(store);
+      }
+      if (session.mode === "rand" && store.inProgress?.rand) {
+        store.inProgress.rand.idx = session.idx;
+        saveStore(store);
+      }
+    }
+
     if (session.idx >= session.ids.length) {
-      // チャレンジ終了
+      // ★完走したので、ここでだけ回数・進捗を確定
+      if (session.mode === "seq") commitSeqIfAny();
+      if (session.mode === "rand") commitRandIfAny();
+
       const title =
         session.mode === "seq" ? "全部順番" :
         session.mode === "rand" ? "全部ランダム" :
