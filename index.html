@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>暗唱例文道場 第１章</title>
+<style>
+  :root{
+    --bg:#f4f6f8;
+    --card:#ffffff;
+    --ink:#1f2937;
+    --muted:#6b7280;
+    --accent:#2c3e50;
+    --ok:#0f766e;
+    --ng:#b91c1c;
+    --shadow:0 2px 10px rgba(0,0,0,.08);
+  }
+  body{
+    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+    margin:0;
+  }
+  header{
+    background:var(--accent);
+    color:#fff;
+    padding:18px 14px;
+    text-align:center;
+  }
+  header h1{
+    margin:0;
+    font-size:22px;
+    letter-spacing:.06em;
+  }
+  .wrap{
+    max-width:860px;
+    margin:18px auto 40px;
+    padding:0 12px;
+  }
+  .menu{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+    margin:14px 0 16px;
+  }
+  @media (min-width:720px){
+    .menu{ grid-template-columns:1fr 1fr; }
+  }
+  .btn{
+    width:100%;
+    border:none;
+    border-radius:10px;
+    background:var(--card);
+    box-shadow:var(--shadow);
+    padding:14px 14px;
+    font-size:15px;
+    text-align:left;
+    cursor:pointer;
+    transition:transform .08s ease, background .15s ease;
+  }
+  .btn:hover{ background:#e8f0fe; transform:translateY(-1px); }
+  .btn.small{
+    text-align:center;
+    font-weight:600;
+  }
+
+  .card{
+    background:var(--card);
+    box-shadow:var(--shadow);
+    border-radius:12px;
+    padding:16px;
+  }
+  .row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+  }
+  .tag{
+    font-size:12px;
+    color:#fff;
+    background:var(--accent);
+    padding:4px 8px;
+    border-radius:999px;
+  }
+  .progress{
+    margin-left:auto;
+    font-size:13px;
+    color:var(--muted);
+  }
+  .jp{
+    font-size:18px;
+    line-height:1.6;
+    margin:10px 0 12px;
+    white-space:pre-wrap;
+  }
+  .answer-area{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  input[type="text"]{
+    flex:1 1 360px;
+    padding:12px 12px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    font-size:16px;
+  }
+  .action{
+    padding:12px 14px;
+    border-radius:10px;
+    border:none;
+    cursor:pointer;
+    font-size:15px;
+    font-weight:700;
+    box-shadow:var(--shadow);
+    background:var(--accent);
+    color:#fff;
+  }
+  .action:disabled{
+    opacity:.55;
+    cursor:not-allowed;
+  }
+  .result{
+    margin-top:12px;
+    padding:12px;
+    border-radius:10px;
+    background:#f9fafb;
+    border:1px solid #e5e7eb;
+  }
+  .result .judge{
+    font-weight:900;
+    margin-bottom:6px;
+  }
+  .ok{ color:var(--ok); }
+  .ng{ color:var(--ng); }
+  .model{
+    margin:6px 0;
+    font-size:16px;
+  }
+  .note{
+    font-size:13px;
+    color:var(--muted);
+  }
+
+  /* 学習記録 */
+  .table-wrap{ overflow:auto; }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:10px;
+    min-width:520px;
+  }
+  th, td{
+    border-bottom:1px solid #e5e7eb;
+    padding:10px 8px;
+    vertical-align:top;
+    text-align:left;
+    white-space:pre-wrap;
+  }
+  th{
+    font-size:13px;
+    color:var(--muted);
+    background:#f9fafb;
+    position:sticky;
+    top:0;
+  }
+  td.num{
+    width:70px;
+    text-align:right;
+    font-variant-numeric:tabular-nums;
+    font-weight:800;
+  }
+  .footer-space{ height:12px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>暗唱例文道場　第１章</h1>
+</header>
+
+<div class="wrap">
+  <div class="menu">
+    <button id="btnSeq" class="btn"></button>
+    <button id="btnRand" class="btn"></button>
+    <button id="btnWrongRand" class="btn">誤答ランダム</button>
+    <button id="btnHard10" class="btn">特に苦手10</button>
+    <button id="btnStats" class="btn">学習記録</button>
+    <button id="btnTop" class="btn">トップページ</button>
+  </div>
+
+  <div id="main" class="card" aria-live="polite"></div>
+  <div class="footer-space"></div>
+</div>
+
+<script>
+(() => {
+  // ========= 設定 =========
+  const CSV_PATH = "grammar.csv";
+  const STORAGE_KEY = "AnshoReibun_Grammar_Ch1_v1"; // 章ごとに分ける場合はここを変える
+  const TOP_URL = "https://daichig-sbmk.github.io/Ansho-Reibun-top/";
+  const PAGE_SIZE = 15;
+
+  // ========= 状態 =========
+  let items = []; // {id, jp, model, altsRaw, altsArr}
+  let byId = new Map();
+
+  let session = null;
+  // session = { mode, ids, idx, total, answered:false }
+
+  // ========= localStorage =========
+  function loadStore() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return initStore();
+      const obj = JSON.parse(raw);
+      return hydrateStore(obj);
+    } catch {
+      return initStore();
+    }
+  }
+
+  function initStore() {
+    const obj = {
+      stats: {}, // id -> { wrong, seqShown, randShown, wrongRandShown, hardShown, lastRandRoundSeen }
+      seqIndex: 0,
+      seqRound: 0,
+      seqChallenge: 0,
+
+      randRound: 0,
+      randChallenge: 0
+    };
+    return obj;
+  }
+
+  function hydrateStore(obj) {
+    // 欠損キーを埋める（将来拡張用）
+    if (!obj || typeof obj !== "object") return initStore();
+    if (!obj.stats) obj.stats = {};
+    if (typeof obj.seqIndex !== "number") obj.seqIndex = 0;
+    if (typeof obj.seqRound !== "number") obj.seqRound = 0;
+    if (typeof obj.seqChallenge !== "number") obj.seqChallenge = 0;
+    if (typeof obj.randRound !== "number") obj.randRound = 0;
+    if (typeof obj.randChallenge !== "number") obj.randChallenge = 0;
+    return obj;
+  }
+
+  function saveStore(store) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  }
+
+  function statFor(store, id) {
+    if (!store.stats[id]) {
+      store.stats[id] = {
+        wrong: 0,
+        seqShown: 0,
+        randShown: 0,
+        wrongRandShown: 0,
+        hardShown: 0,
+        lastRandRoundSeen: -1
+      };
+    } else {
+      const s = store.stats[id];
+      if (typeof s.wrong !== "number") s.wrong = 0;
+      if (typeof s.seqShown !== "number") s.seqShown = 0;
+      if (typeof s.randShown !== "number") s.randShown = 0;
+      if (typeof s.wrongRandShown !== "number") s.wrongRandShown = 0;
+      if (typeof s.hardShown !== "number") s.hardShown = 0;
+      if (typeof s.lastRandRoundSeen !== "number") s.lastRandRoundSeen = -1;
+    }
+    return store.stats[id];
+  }
+
+  // ========= CSV =========
+  function parseCSV(text) {
+    // RFC4180に近い簡易パーサ（クォート対応）
+    const rows = [];
+    let row = [];
+    let field = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i++; }
+          else inQuotes = false;
+        } else {
+          field += c;
+        }
+      } else {
+        if (c === '"') inQuotes = true;
+        else if (c === ",") { row.push(field); field = ""; }
+        else if (c === "\r") { /* ignore */ }
+        else if (c === "\n") {
+          row.push(field); field = "";
+          // 空行はスキップ（ただし列がある場合は保持）
+          if (row.some(v => v !== "")) rows.push(row);
+          row = [];
+        } else {
+          field += c;
+        }
+      }
+    }
+    // 最終行
+    row.push(field);
+    if (row.some(v => v !== "")) rows.push(row);
+
+    return rows;
+  }
+
+  async function loadData() {
+    const res = await fetch(CSV_PATH, { cache: "no-store" });
+    if (!res.ok) throw new Error("grammar.csv を読み込めませんでした。");
+    const text = await res.text();
+
+    const rows = parseCSV(text);
+    if (rows.length === 0) throw new Error("CSVが空です。");
+
+    // ヘッダー確認（id,jp,model,alts）
+    const header = rows[0].map(s => (s || "").trim());
+    const idx = {
+      id: header.indexOf("id"),
+      jp: header.indexOf("jp"),
+      model: header.indexOf("model"),
+      alts: header.indexOf("alts")
+    };
+    if (idx.id < 0 || idx.jp < 0 || idx.model < 0 || idx.alts < 0) {
+      throw new Error("CSVヘッダーは id,jp,model,alts が必要です。");
+    }
+
+    const data = [];
+    for (let r = 1; r < rows.length; r++) {
+      const cols = rows[r];
+      const id = (cols[idx.id] ?? "").trim();
+      const jp = (cols[idx.jp] ?? "").trim();
+      const model = (cols[idx.model] ?? "").trim();
+      const altsRaw = (cols[idx.alts] ?? "").trim();
+
+      if (!id || !jp || !model) continue;
+
+      const altsArr = altsRaw
+        ? altsRaw.split("|").map(s => s.trim()).filter(Boolean)
+        : [];
+
+      data.push({ id, jp, model, altsRaw, altsArr });
+    }
+
+    if (data.length === 0) throw new Error("有効なデータ行がありません。");
+
+    items = data;
+    byId = new Map(items.map(x => [x.id, x]));
+  }
+
+  // ========= 正規化 =========
+  function normalizeAnswer(s) {
+    if (s == null) return "";
+    // Unicode正規化（全角/半角など）
+    let t = String(s).normalize("NFKC");
+
+    // アポストロフィ統一（’ など → '）
+    t = t.replace(/[’‘`]/g, "'");
+
+    // 各種スペース→半角スペース
+    t = t.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, " ");
+
+    // 余分な空白を整理（連続→1つ、両端トリム）
+    t = t.replace(/\s+/g, " ").trim();
+
+    // 大文字小文字は区別しない
+    t = t.toLowerCase();
+
+    return t;
+  }
+
+  // ========= 出題ロジック =========
+  function challengesPerRound() {
+    return Math.ceil(items.length / PAGE_SIZE);
+  }
+
+  function updateMenuLabels() {
+    const store = loadStore();
+    const per = challengesPerRound();
+
+    const btnSeq = document.getElementById("btnSeq");
+    const btnRand = document.getElementById("btnRand");
+
+    btnSeq.textContent = `全部順番（${per}回で１周。現在${store.seqChallenge}回）`;
+    btnRand.textContent = `全部ランダム（${per}回で１周。現在${store.randChallenge}回）`;
+  }
+
+  function startSeqChallenge() {
+    const store = loadStore();
+    const n = items.length;
+
+    let start = store.seqIndex;
+    let end = Math.min(start + PAGE_SIZE, n);
+    const selected = items.slice(start, end).map(x => x.id);
+
+    // 表示回数カウント（この形式）
+    selected.forEach(id => statFor(store, id).seqShown++);
+
+    // 次回の開始位置
+    store.seqIndex = end;
+    store.seqChallenge++;
+
+    // 1周終了なら次周へ
+    if (store.seqIndex >= n) {
+      store.seqIndex = 0;
+      store.seqRound++;
+    }
+
+    saveStore(store);
+
+    session = {
+      mode: "seq",
+      ids: selected,
+      idx: 0,
+      total: selected.length,
+      answered: false
+    };
+    renderQuestion();
+    updateMenuLabels();
+  }
+
+  function chooseRandSetForChallenge(store) {
+    const round = store.randRound;
+
+    // 未出題（このラウンドでまだ出してないもの）を優先
+    let candidates = items
+      .filter(x => statFor(store, x.id).lastRandRoundSeen !== round)
+      .map(x => x.id);
+
+    // もし全て出し終えたら新ラウンドへ
+    if (candidates.length === 0) {
+      store.randRound++;
+      // round更新
+      const newRound = store.randRound;
+      candidates = items
+        .filter(x => statFor(store, x.id).lastRandRoundSeen !== newRound)
+        .map(x => x.id);
+    }
+
+    // このチャレンジで出す数（残りが少なければ少ないまま）
+    const count = Math.min(PAGE_SIZE, candidates.length);
+
+    // 優先規則：この形式での出題回数が少ない → 同じなら誤答回数が多い → その上でランダム
+    // ランダム性を入れるため、同順位内をシャッフルしつつソートのタイブレークに使用
+    const randKey = new Map();
+    candidates.forEach(id => randKey.set(id, Math.random()));
+
+    candidates.sort((a, b) => {
+      const sa = statFor(store, a);
+      const sb = statFor(store, b);
+
+      if (sa.randShown !== sb.randShown) return sa.randShown - sb.randShown; // 少ない優先
+      if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong; // 多い優先
+      return (randKey.get(a) ?? 0) - (randKey.get(b) ?? 0);
+    });
+
+    const selected = candidates.slice(0, count);
+
+    // 選択したものを「このラウンドで出した」扱い
+    const useRound = store.randRound;
+    selected.forEach(id => {
+      const s = statFor(store, id);
+      s.randShown++;
+      s.lastRandRoundSeen = useRound;
+    });
+
+    return selected;
+  }
+
+  function startRandChallenge() {
+    const store = loadStore();
+    const selected = chooseRandSetForChallenge(store);
+
+    store.randChallenge++;
+    saveStore(store);
+
+    session = {
+      mode: "rand",
+      ids: selected,
+      idx: 0,
+      total: selected.length,
+      answered: false
+    };
+    renderQuestion();
+    updateMenuLabels();
+  }
+
+  function startWrongRandChallenge() {
+    const store = loadStore();
+
+    // 学習記録対象の誤答（wrong>=1）だけ
+    const pool = items
+      .filter(x => statFor(store, x.id).wrong >= 1)
+      .map(x => x.id);
+
+    if (pool.length === 0) {
+      showMessageCard("誤答ランダム", "学習記録に誤答がまだありません。まず「全部順番」または「全部ランダム」で取り組んでください。");
+      return;
+    }
+
+    const count = Math.min(PAGE_SIZE, pool.length);
+    const randKey = new Map();
+    pool.forEach(id => randKey.set(id, Math.random()));
+
+    // 優先規則：この形式での出題回数が少ない → 同じなら誤答回数が多い → その上でランダム
+    pool.sort((a, b) => {
+      const sa = statFor(store, a);
+      const sb = statFor(store, b);
+
+      if (sa.wrongRandShown !== sb.wrongRandShown) return sa.wrongRandShown - sb.wrongRandShown;
+      if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong;
+      return (randKey.get(a) ?? 0) - (randKey.get(b) ?? 0);
+    });
+
+    const selected = pool.slice(0, count);
+    selected.forEach(id => statFor(store, id).wrongRandShown++);
+
+    saveStore(store);
+
+    session = {
+      mode: "wrongRand",
+      ids: selected,
+      idx: 0,
+      total: selected.length,
+      answered: false
+    };
+    renderQuestion();
+    updateMenuLabels();
+  }
+
+  function startHard10Challenge() {
+    const store = loadStore();
+
+    // 累計誤答（学習記録のwrong）の上位10
+    const withWrong = items
+      .map(x => ({ id: x.id, wrong: statFor(store, x.id).wrong }))
+      .filter(x => x.wrong >= 1);
+
+    if (withWrong.length === 0) {
+      showMessageCard("特に苦手10", "学習記録に誤答がまだありません。まず「全部順番」または「全部ランダム」で取り組んでください。");
+      return;
+    }
+
+    withWrong.sort((a,b) => b.wrong - a.wrong);
+    const top = withWrong.slice(0, 10).map(x => x.id);
+
+    // ランダムに出題（最大10なので全部）
+    shuffleInPlace(top);
+
+    top.forEach(id => statFor(store, id).hardShown++);
+    saveStore(store);
+
+    session = {
+      mode: "hard10",
+      ids: top,
+      idx: 0,
+      total: top.length,
+      answered: false
+    };
+    renderQuestion();
+    updateMenuLabels();
+  }
+
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  // ========= 表示 =========
+  function showMessageCard(title, body) {
+    const main = document.getElementById("main");
+    main.innerHTML = `
+      <div class="row">
+        <span class="tag">${escapeHtml(title)}</span>
+      </div>
+      <p class="note" style="margin-top:10px; white-space:pre-wrap;">${escapeHtml(body)}</p>
+    `;
+  }
+
+  function renderQuestion() {
+    if (!session || session.ids.length === 0) {
+      showMessageCard("準備中", "メニューから出題形式を選んでください。");
+      return;
+    }
+    const id = session.ids[session.idx];
+    const q = byId.get(id);
+
+    const main = document.getElementById("main");
+    const modeLabel =
+      session.mode === "seq" ? "全部順番" :
+      session.mode === "rand" ? "全部ランダム" :
+      session.mode === "wrongRand" ? "誤答ランダム" : "特に苦手10";
+
+    main.innerHTML = `
+      <div class="row">
+        <span class="tag">${modeLabel}</span>
+        <div class="progress">進行状況：${session.idx + 1}／${session.total}問中</div>
+      </div>
+
+      <div class="jp">${escapeHtml(q.jp)}</div>
+
+      <div class="answer-area">
+        <input id="answerInput" type="text" autocomplete="off" placeholder="ここに英作文を入力" />
+        <button id="checkBtn" class="action">判定</button>
+      </div>
+
+      <div id="resultBox" class="result" style="display:none;"></div>
+    `;
+
+    const input = document.getElementById("answerInput");
+    const btn = document.getElementById("checkBtn");
+
+    // Enterで判定
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") btn.click();
+    });
+
+    btn.addEventListener("click", () => checkAnswer());
+
+    // フォーカス
+    setTimeout(() => input.focus(), 0);
+  }
+
+  function checkAnswer() {
+    if (!session || session.answered) return;
+
+    const id = session.ids[session.idx];
+    const q = byId.get(id);
+
+    const inputEl = document.getElementById("answerInput");
+    const btn = document.getElementById("checkBtn");
+    const resultBox = document.getElementById("resultBox");
+
+    const userRaw = inputEl.value;
+    const userN = normalizeAnswer(userRaw);
+
+    const accept = [q.model, ...(q.altsArr || [])].map(normalizeAnswer);
+    const isCorrect = accept.includes(userN);
+
+    // 学習記録に加えるのは seq / rand のみ（指定どおり）
+    if (!isCorrect) {
+      if (session.mode === "seq" || session.mode === "rand") {
+        const store = loadStore();
+        statFor(store, id).wrong++;
+        saveStore(store);
+      }
+    }
+
+    // 結果表示（入力は残し、編集不可に）
+    inputEl.disabled = true;
+    btn.disabled = true;
+
+    const judge = isCorrect ? "正解" : "不正解";
+    const judgeClass = isCorrect ? "ok" : "ng";
+
+    resultBox.style.display = "block";
+    resultBox.innerHTML = `
+      <div class="judge ${judgeClass}">${judge}</div>
+      <div class="model"><strong>模範解答：</strong> ${escapeHtml(q.model)}</div>
+      ${q.altsArr && q.altsArr.length ? `<div class="note">別解：${escapeHtml(q.altsArr.join(" / "))}</div>` : ``}
+      <div style="margin-top:10px;">
+        <button id="nextBtn" class="action">次の問題へ</button>
+      </div>
+    `;
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+      nextQuestion();
+    });
+
+    session.answered = true;
+  }
+
+  function nextQuestion() {
+    if (!session) return;
+    session.idx++;
+
+    if (session.idx >= session.ids.length) {
+      // チャレンジ終了
+      const title =
+        session.mode === "seq" ? "全部順番" :
+        session.mode === "rand" ? "全部ランダム" :
+        session.mode === "wrongRand" ? "誤答ランダム" : "特に苦手10";
+
+      showMessageCard(title, "このチャレンジは終了しました。\nメニューから次の出題を選んでください。");
+      session = null;
+      updateMenuLabels();
+      return;
+    }
+
+    session.answered = false;
+    renderQuestion();
+  }
+
+  function renderStats() {
+    const store = loadStore();
+
+    const rows = items
+      .map(x => {
+        const s = statFor(store, x.id);
+        return { wrong: s.wrong, model: x.model, jp: x.jp };
+      })
+      .filter(x => x.wrong >= 1)
+      .sort((a,b) => b.wrong - a.wrong);
+
+    const main = document.getElementById("main");
+
+    if (rows.length === 0) {
+      main.innerHTML = `
+        <div class="row">
+          <span class="tag">学習記録</span>
+        </div>
+        <p class="note" style="margin-top:10px;">まだ記録がありません。「全部順番」または「全部ランダム」で間違えると記録されます。</p>
+      `;
+      return;
+    }
+
+    const tbody = rows.map(r => `
+      <tr>
+        <td class="num">${r.wrong}</td>
+        <td>${escapeHtml(r.model)}</td>
+        <td>${escapeHtml(r.jp)}</td>
+      </tr>
+    `).join("");
+
+    main.innerHTML = `
+      <div class="row">
+        <span class="tag">学習記録</span>
+        <div class="progress">（「全部順番」「全部ランダム」での誤答のみ）</div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:70px; text-align:right;">回</th>
+              <th>英語</th>
+              <th>日本語</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tbody}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#39;");
+  }
+
+  // ========= イベント =========
+  function bindMenu() {
+    document.getElementById("btnSeq").addEventListener("click", () => startSeqChallenge());
+    document.getElementById("btnRand").addEventListener("click", () => startRandChallenge());
+    document.getElementById("btnWrongRand").addEventListener("click", () => startWrongRandChallenge());
+    document.getElementById("btnHard10").addEventListener("click", () => startHard10Challenge());
+    document.getElementById("btnStats").addEventListener("click", () => { session = null; renderStats(); updateMenuLabels(); });
+    document.getElementById("btnTop").addEventListener("click", () => { location.href = TOP_URL; });
+  }
+
+  // ========= 起動 =========
+  (async function boot(){
+    const main = document.getElementById("main");
+    main.innerHTML = `<div class="note">読み込み中…</div>`;
+
+    try{
+      await loadData();
+
+      // statsの初期化（存在しないidに備える）
+      const store = loadStore();
+      items.forEach(x => statFor(store, x.id));
+      saveStore(store);
+
+      bindMenu();
+      updateMenuLabels();
+
+      showMessageCard("準備完了", "メニューから出題形式を選んでください。");
+    } catch(e){
+      bindMenu();
+      updateMenuLabels();
+      showMessageCard("エラー", (e && e.message) ? e.message : "読み込みに失敗しました。");
+    }
+  })();
+})();
+</script>
+</body>
+</html>
