@@ -313,7 +313,12 @@
   async function loadData() {
     const res = await fetch(CSV_PATH, { cache: "no-store" });
     if (!res.ok) throw new Error("grammar.csv を読み込めませんでした。");
-    const text = await res.text();
+    let text = await res.text();
+
+// BOM除去（UTF-8 with BOM対策）
+if (text.charCodeAt(0) === 0xFEFF) {
+  text = text.slice(1);
+}
 
     const rows = parseCSV(text);
     if (rows.length === 0) throw new Error("CSVが空です。");
