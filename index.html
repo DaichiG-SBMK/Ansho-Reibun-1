@@ -312,52 +312,81 @@
     return rows;
   }
 
-  async function loadData() {
-    const res = await fetch(CSV_PATH, { cache: "no-store" });
-    if (!res.ok) throw new Error("grammar.csv を読み込めませんでした。");
-    let text = await res.text();
+async function loadData() {
+  const res = await fetch(CSV_PATH, { cache: "no-store" });
+  if (!res.ok) throw new Error("grammar.csv を読み込めませんでした。");
 
-    // BOM除去（UTF-8 with BOM対策）
-    if (text.charCodeAt(0) === 0xFEFF) {
-      text = text.slice(1);
+  const buf = await res.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+
+  // 文字コード判定＆デコード（できるだけ安全に）
+  let text = "";
+
+  // BOMでUTF-16を優先判定
+  const hasUTF16LEBOM = bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE;
+  const hasUTF16BEBOM = bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF;
+  const hasUTF8BOM   = bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF;
+
+  try {
+    if (hasUTF16LEBOM) {
+      text = new TextDecoder("utf-16le").decode(buf);
+    } else if (hasUTF16BEBOM) {
+      text = new TextDecoder("utf-16be").decode(buf);
+    } else {
+      // まずUTF-8（厳密）で試す。ダメならShift_JISにフォールバック
+      try {
+        text = new TextDecoder("utf-8", { fatal: true }).decode(buf);
+      } catch {
+        text = new TextDecoder("shift-jis").decode(buf);
+      }
     }
-
-    const rows = parseCSV(text);
-    if (rows.length === 0) throw new Error("CSVが空です。");
-
-    const header = rows[0].map(s => (s || "").trim());
-    const idx = {
-      id: header.indexOf("id"),
-      jp: header.indexOf("jp"),
-      model: header.indexOf("model"),
-      alts: header.indexOf("alts")
-    };
-    if (idx.id < 0 || idx.jp < 0 || idx.model < 0 || idx.alts < 0) {
-      throw new Error("CSVヘッダーは id,jp,model,alts が必要です。");
-    }
-
-    const data = [];
-    for (let r = 1; r < rows.length; r++) {
-      const cols = rows[r];
-      const id = (cols[idx.id] ?? "").trim();
-      const jp = (cols[idx.jp] ?? "").trim();
-      const model = (cols[idx.model] ?? "").trim();
-      const altsRaw = (cols[idx.alts] ?? "").trim();
-
-      if (!id || !jp || !model) continue;
-
-      const altsArr = altsRaw
-        ? altsRaw.split("|").map(s => s.trim()).filter(Boolean)
-        : [];
-
-      data.push({ id, jp, model, altsRaw, altsArr });
-    }
-
-    if (data.length === 0) throw new Error("有効なデータ行がありません。");
-
-    items = data;
-    byId = new Map(items.map(x => [x.id, x]));
+  } catch {
+    // 最終手段：utf-8（非fatal）
+    text = new TextDecoder("utf-8").decode(buf);
   }
+
+  // BOM除去（UTF-8 BOM / Unicode BOM）
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  if (text.startsWith("\uFEFF")) text = text.slice(1);
+  if (hasUTF8BOM) text = text.slice(1); // 念のため（上で消えてることが多い）
+
+  const rows = parseCSV(text);
+  if (rows.length === 0) throw new Error("CSVが空です。");
+
+  // ヘッダー確認（id,jp,model,alts）
+  const header = rows[0].map(s => (s || "").trim());
+  const idx = {
+    id: header.indexOf("id"),
+    jp: header.indexOf("jp"),
+    model: header.indexOf("model"),
+    alts: header.indexOf("alts")
+  };
+  if (idx.id < 0 || idx.jp < 0 || idx.model < 0 || idx.alts < 0) {
+    throw new Error("CSVヘッダーは id,jp,model,alts が必要です。");
+  }
+
+  const data = [];
+  for (let r = 1; r < rows.length; r++) {
+    const cols = rows[r];
+    const id = (cols[idx.id] ?? "").trim();
+    const jp = (cols[idx.jp] ?? "").trim();
+    const model = (cols[idx.model] ?? "").trim();
+    const altsRaw = (cols[idx.alts] ?? "").trim();
+
+    if (!id || !jp || !model) continue;
+
+    const altsArr = altsRaw
+      ? altsRaw.split("|").map(s => s.trim()).filter(Boolean)
+      : [];
+
+    data.push({ id, jp, model, altsRaw, altsArr });
+  }
+
+  if (data.length === 0) throw new Error("有効なデータ行がありません。");
+
+  items = data;
+  byId = new Map(items.map(x => [x.id, x]));
+}
 
   // ========= 正規化 =========
   function normalizeAnswer(s) {
