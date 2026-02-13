@@ -246,7 +246,10 @@ function render(){
   document.getElementById("check").onclick=check;
 const ans = document.getElementById("ans");
 ans.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") document.getElementById("check").click();
+  if (e.key === "Enter") {
+    e.preventDefault();   // ← ここを追加
+    document.getElementById("check").click();
+  }
 });
 }
 
@@ -267,13 +270,17 @@ function check(){
      <button class="action" id="nextBtn" onclick="nextQ()">次へ</button>`;
 
 const nextBtn = document.getElementById("nextBtn");
-nextBtn.focus();
-document.addEventListener("keydown", function handler(e){
-  if (e.key === "Enter") {
-    nextBtn.click();
-    document.removeEventListener("keydown", handler);
-  }
-}, { once: true });
+
+// 今押したEnter（判定に使ったEnter）が「次へ」にも効かないように、次のイベントから有効化
+setTimeout(() => {
+  nextBtn.focus();
+  nextBtn.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      nextBtn.click();
+    }
+  }, { once: true });
+}, 0);
 }
 
 window.nextQ=function(){
