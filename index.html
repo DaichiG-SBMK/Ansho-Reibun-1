@@ -5,897 +5,302 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>暗唱例文道場 第１章</title>
 <style>
-  :root{
-    --bg:#f4f6f8;
-    --card:#ffffff;
-    --ink:#1f2937;
-    --muted:#6b7280;
-    --accent:#2c3e50;
-    --ok:#0f766e;
-    --ng:#b91c1c;
-    --shadow:0 2px 10px rgba(0,0,0,.08);
-  }
-  body{
-    font-family:-apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Noto Sans JP", sans-serif;
-    background:var(--bg);
-    color:var(--ink);
-    margin:0;
-  }
-  header{
-    background:var(--accent);
-    color:#fff;
-    padding:18px 14px;
-    text-align:center;
-  }
-  header h1{
-    margin:0;
-    font-size:22px;
-    letter-spacing:.06em;
-  }
-  .wrap{
-    max-width:860px;
-    margin:18px auto 40px;
-    padding:0 12px;
-  }
-  .menu{
-    display:grid;
-    grid-template-columns:1fr;
-    gap:10px;
-    margin:14px 0 16px;
-  }
-  @media (min-width:720px){
-    .menu{ grid-template-columns:1fr 1fr; }
-  }
-  .btn{
-    width:100%;
-    border:none;
-    border-radius:10px;
-    background:var(--card);
-    box-shadow:var(--shadow);
-    padding:14px 14px;
-    font-size:15px;
-    text-align:left;
-    cursor:pointer;
-    transition:transform .08s ease, background .15s ease;
-  }
-  .btn:hover{ background:#e8f0fe; transform:translateY(-1px); }
-
-  .card{
-    background:var(--card);
-    box-shadow:var(--shadow);
-    border-radius:12px;
-    padding:16px;
-  }
-  .row{
-    display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:center;
-  }
-  .tag{
-    font-size:12px;
-    color:#fff;
-    background:var(--accent);
-    padding:4px 8px;
-    border-radius:999px;
-  }
-  .progress{
-    margin-left:auto;
-    font-size:13px;
-    color:var(--muted);
-  }
-  .jp{
-    font-size:18px;
-    line-height:1.6;
-    margin:10px 0 12px;
-    white-space:pre-wrap;
-  }
-  .answer-area{
-    display:flex;
-    gap:10px;
-    flex-wrap:wrap;
-  }
-  input[type="text"]{
-    flex:1 1 360px;
-    padding:12px 12px;
-    border-radius:10px;
-    border:1px solid #d1d5db;
-    font-size:16px;
-  }
-  .action{
-    padding:12px 14px;
-    border-radius:10px;
-    border:none;
-    cursor:pointer;
-    font-size:15px;
-    font-weight:700;
-    box-shadow:var(--shadow);
-    background:var(--accent);
-    color:#fff;
-  }
-  .action:disabled{
-    opacity:.55;
-    cursor:not-allowed;
-  }
-  .result{
-    margin-top:12px;
-    padding:12px;
-    border-radius:10px;
-    background:#f9fafb;
-    border:1px solid #e5e7eb;
-  }
-  .result .judge{
-    font-weight:900;
-    margin-bottom:6px;
-  }
-  .ok{ color:var(--ok); }
-  .ng{ color:var(--ng); }
-  .model{
-    margin:6px 0;
-    font-size:16px;
-  }
-  .note{
-    font-size:13px;
-    color:var(--muted);
-  }
-
-  /* 学習記録 */
-  .table-wrap{ overflow:auto; }
-  table{
-    width:100%;
-    border-collapse:collapse;
-    margin-top:10px;
-    min-width:520px;
-  }
-  th, td{
-    border-bottom:1px solid #e5e7eb;
-    padding:10px 8px;
-    vertical-align:top;
-    text-align:left;
-    white-space:pre-wrap;
-  }
-  th{
-    font-size:13px;
-    color:var(--muted);
-    background:#f9fafb;
-    position:sticky;
-    top:0;
-  }
-  td.num{
-    width:70px;
-    text-align:right;
-    font-variant-numeric:tabular-nums;
-    font-weight:800;
-  }
-  .footer-space{ height:12px; }
+:root{
+  --bg:#f4f6f8;
+  --card:#ffffff;
+  --ink:#1f2937;
+  --muted:#6b7280;
+  --accent:#2c3e50;
+  --ok:#0f766e;
+  --ng:#b91c1c;
+  --shadow:0 2px 10px rgba(0,0,0,.08);
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Noto Sans JP",sans-serif;
+  background:var(--bg);
+  margin:0;
+}
+header{
+  background:var(--accent);
+  color:#fff;
+  padding:18px;
+  text-align:center;
+}
+.wrap{
+  max-width:860px;
+  margin:20px auto;
+  padding:0 12px;
+}
+.menu{
+  display:grid;
+  gap:10px;
+  margin-bottom:15px;
+}
+.btn{
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  background:#fff;
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  text-align:left;
+}
+.card{
+  background:#fff;
+  padding:16px;
+  border-radius:12px;
+  box-shadow:var(--shadow);
+}
+.jp{
+  font-size:18px;
+  margin:12px 0;
+  white-space:pre-wrap;
+}
+.answer-area{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+input{
+  flex:1;
+  padding:12px;
+  font-size:16px;
+}
+.action{
+  padding:12px 14px;
+  background:var(--accent);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+.result{
+  margin-top:10px;
+}
+.ok{color:var(--ok);}
+.ng{color:var(--ng);}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+}
+th,td{
+  border-bottom:1px solid #ddd;
+  padding:8px;
+}
+th{
+  background:#f3f4f6;
+  text-align:left;
+}
 </style>
 </head>
 <body>
 <header>
-  <h1>暗唱例文道場　第１章</h1>
+<h1>暗唱例文道場　第１章</h1>
 </header>
 
 <div class="wrap">
-  <div class="menu">
-    <button id="btnSeq" class="btn"></button>
-    <button id="btnRand" class="btn"></button>
-    <button id="btnWrongRand" class="btn">誤答ランダム</button>
-    <button id="btnHard10" class="btn">特に苦手10</button>
-    <button id="btnStats" class="btn">学習記録</button>
-    <button id="btnTop" class="btn">トップページ</button>
-  </div>
+<div class="menu">
+<button id="btnSeq" class="btn"></button>
+<button id="btnRand" class="btn">全部ランダム</button>
+<button id="btnWrongRand" class="btn">誤答ランダム</button>
+<button id="btnStats" class="btn">学習記録</button>
+<button id="btnReset" class="btn">記録リセット</button>
+<button id="btnTop" class="btn">トップページ</button>
+</div>
 
-  <div id="main" class="card" aria-live="polite"></div>
-  <div class="footer-space"></div>
+<div id="main" class="card"></div>
 </div>
 
 <script>
 (() => {
-  // ========= 設定 =========
-  const CSV_PATH = "grammar.csv";
-  const STORAGE_KEY = "AnshoReibun_Grammar_Ch1_v1";
-  const TOP_URL = "https://daichig-sbmk.github.io/Ansho-Reibun-top/";
-  const PAGE_SIZE = 15;
 
-  // ========= 状態 =========
-  let items = []; // {id, jp, model, altsRaw, altsArr}
-  let byId = new Map();
+const STORAGE_KEY = "AnshoReibun_Grammar_Ch1_v2";
+const PAGE_SIZE = 15;
+const TOP_URL = "https://daichig-sbmk.github.io/Ansho-Reibun-top/";
+let items = [];
+let byId = new Map();
+let session = null;
 
-  let session = null;
-  // session = { mode, ids, idx, total, answered:false }
+function loadStore(){
+  return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"stats":{},"seqIndex":0,"inProgress":{}}');
+}
+function saveStore(s){ localStorage.setItem(STORAGE_KEY,JSON.stringify(s)); }
 
-  // ========= localStorage =========
-  function loadStore() {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return initStore();
-      const obj = JSON.parse(raw);
-      return hydrateStore(obj);
-    } catch {
-      return initStore();
-    }
-  }
-
-  function initStore() {
-    return {
-      stats: {}, // id -> { wrong, seqShown, randShown, wrongRandShown, hardShown, lastRandRoundSeen }
-      seqIndex: 0,
-      seqRound: 0,
-      seqChallenge: 0,
-
-      randRound: 0,
-      randChallenge: 0,
-
-      // ★追加：途中セッション（完走するまで回数を増やさない）
-      inProgress: {
-        seq: null,  // { ids, idx, startIndex, endIndex, willWrap, roundAtStart }
-        rand: null  // { ids, idx, useRound, advancedRoundTo }
-      }
-    };
-  }
-
-  function hydrateStore(obj) {
-    if (!obj || typeof obj !== "object") return initStore();
-    if (!obj.stats) obj.stats = {};
-    if (typeof obj.seqIndex !== "number") obj.seqIndex = 0;
-    if (typeof obj.seqRound !== "number") obj.seqRound = 0;
-    if (typeof obj.seqChallenge !== "number") obj.seqChallenge = 0;
-    if (typeof obj.randRound !== "number") obj.randRound = 0;
-    if (typeof obj.randChallenge !== "number") obj.randChallenge = 0;
-
-    if (!obj.inProgress) obj.inProgress = { seq: null, rand: null };
-    if (!("seq" in obj.inProgress)) obj.inProgress.seq = null;
-    if (!("rand" in obj.inProgress)) obj.inProgress.rand = null;
-
-    return obj;
-  }
-
-  function saveStore(store) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-  }
-
-  function statFor(store, id) {
-    if (!store.stats[id]) {
-      store.stats[id] = {
-        wrong: 0,
-        seqShown: 0,
-        randShown: 0,
-        wrongRandShown: 0,
-        hardShown: 0,
-        lastRandRoundSeen: -1
-      };
-    } else {
-      const s = store.stats[id];
-      if (typeof s.wrong !== "number") s.wrong = 0;
-      if (typeof s.seqShown !== "number") s.seqShown = 0;
-      if (typeof s.randShown !== "number") s.randShown = 0;
-      if (typeof s.wrongRandShown !== "number") s.wrongRandShown = 0;
-      if (typeof s.hardShown !== "number") s.hardShown = 0;
-      if (typeof s.lastRandRoundSeen !== "number") s.lastRandRoundSeen = -1;
-    }
-    return store.stats[id];
-  }
-
-  // ========= CSV（カンマ/タブ対応） =========
-  function parseCSV(text) {
-    const rows = [];
-    let row = [];
-    let field = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < text.length; i++) {
-      const c = text[i];
-
-      if (inQuotes) {
-        if (c === '"') {
-          if (text[i + 1] === '"') { field += '"'; i++; }
-          else inQuotes = false;
-        } else {
-          field += c;
-        }
-      } else {
-        if (c === '"') inQuotes = true;
-        else if (c === "," || c === "\t") { row.push(field); field = ""; }
-        else if (c === "\r") { /* ignore */ }
-        else if (c === "\n") {
-          row.push(field); field = "";
-          if (row.some(v => v !== "")) rows.push(row);
-          row = [];
-        } else {
-          field += c;
-        }
-      }
-    }
-    row.push(field);
-    if (row.some(v => v !== "")) rows.push(row);
-
-    return rows;
-  }
-
-async function loadData() {
-  const res = await fetch(CSV_PATH, { cache: "no-store" });
-  if (!res.ok) throw new Error("grammar.csv を読み込めませんでした。");
-
-  const buf = await res.arrayBuffer();
-  const bytes = new Uint8Array(buf);
-
-  // 文字コード判定＆デコード（できるだけ安全に）
-  let text = "";
-
-  // BOMでUTF-16を優先判定
-  const hasUTF16LEBOM = bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE;
-  const hasUTF16BEBOM = bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF;
-  const hasUTF8BOM   = bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF;
-
-  try {
-    if (hasUTF16LEBOM) {
-      text = new TextDecoder("utf-16le").decode(buf);
-    } else if (hasUTF16BEBOM) {
-      text = new TextDecoder("utf-16be").decode(buf);
-    } else {
-      // まずUTF-8（厳密）で試す。ダメならShift_JISにフォールバック
-      try {
-        text = new TextDecoder("utf-8", { fatal: true }).decode(buf);
-      } catch {
-        text = new TextDecoder("shift-jis").decode(buf);
-      }
-    }
-  } catch {
-    // 最終手段：utf-8（非fatal）
-    text = new TextDecoder("utf-8").decode(buf);
-  }
-
-  // BOM除去（UTF-8 BOM / Unicode BOM）
-  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-  if (text.startsWith("\uFEFF")) text = text.slice(1);
-  if (hasUTF8BOM) text = text.slice(1); // 念のため（上で消えてることが多い）
-
-  const rows = parseCSV(text);
-  if (rows.length === 0) throw new Error("CSVが空です。");
-
-  // ヘッダー確認（id,jp,model,alts）
-  const header = rows[0].map(s => (s || "").trim());
-  const idx = {
-    id: header.indexOf("id"),
-    jp: header.indexOf("jp"),
-    model: header.indexOf("model"),
-    alts: header.indexOf("alts")
-  };
-  if (idx.id < 0 || idx.jp < 0 || idx.model < 0 || idx.alts < 0) {
-    throw new Error("CSVヘッダーは id,jp,model,alts が必要です。");
-  }
-
-  const data = [];
-  for (let r = 1; r < rows.length; r++) {
-    const cols = rows[r];
-    const id = (cols[idx.id] ?? "").trim();
-    const jp = (cols[idx.jp] ?? "").trim();
-    const model = (cols[idx.model] ?? "").trim();
-    const altsRaw = (cols[idx.alts] ?? "").trim();
-
-    if (!id || !jp || !model) continue;
-
-    const altsArr = altsRaw
-      ? altsRaw.split("|").map(s => s.trim()).filter(Boolean)
-      : [];
-
-    data.push({ id, jp, model, altsRaw, altsArr });
-  }
-
-  if (data.length === 0) throw new Error("有効なデータ行がありません。");
-
-  items = data;
-  byId = new Map(items.map(x => [x.id, x]));
+function statFor(store,id){
+  if(!store.stats[id]) store.stats[id]={wrong:0,seqShown:0,randShown:0};
+  return store.stats[id];
 }
 
-  // ========= 正規化 =========
-  function normalizeAnswer(s) {
-    if (s == null) return "";
-    let t = String(s).normalize("NFKC");
-    t = t.replace(/[’‘`]/g, "'");
-    t = t.replace(/[\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]/g, " ");
-    t = t.replace(/\s+/g, " ").trim();
-    t = t.toLowerCase();
-    return t;
+function normalize(s){
+  return s.normalize("NFKC")
+          .replace(/[’‘`]/g,"'")
+          .replace(/\s+/g," ")
+          .trim()
+          .toLowerCase();
+}
+
+async function loadData(){
+  const res=await fetch("grammar.csv",{cache:"no-store"});
+  const buf=await res.arrayBuffer();
+  let text;
+  try{text=new TextDecoder("utf-8",{fatal:true}).decode(buf);}
+  catch{text=new TextDecoder("shift-jis").decode(buf);}
+  if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
+
+  const rows=text.split(/\r?\n/).filter(r=>r.trim());
+  const header=rows[0].split(/,|\t/);
+  const idI=header.indexOf("id");
+  const jpI=header.indexOf("jp");
+  const mI=header.indexOf("model");
+  const aI=header.indexOf("alts");
+
+  for(let i=1;i<rows.length;i++){
+    const cols=rows[i].split(/,|\t/);
+    if(!cols[idI]) continue;
+    const alts=(cols[aI]||"").split("|").filter(Boolean);
+    items.push({id:cols[idI],jp:cols[jpI],model:cols[mI],alts});
   }
+  byId=new Map(items.map(x=>[x.id,x]));
+}
 
-  // ========= 出題ロジック =========
-  function challengesPerRound() {
-    return items.length ? Math.ceil(items.length / PAGE_SIZE) : 0;
+function updateSeqLabel(){
+  const store=loadStore();
+  const per=Math.ceil(items.length/PAGE_SIZE);
+  const mid=store.inProgress?.seq?"（途中あり）":"";
+  document.getElementById("btnSeq").textContent=
+    `全部順番（${per}回で１周）${mid}`;
+}
+
+function startSeq(){
+  const store=loadStore();
+  if(store.inProgress?.seq){
+    session=store.inProgress.seq;
+    render();
+    return;
   }
+  const start=store.seqIndex||0;
+  const selected=items.slice(start,start+PAGE_SIZE).map(x=>x.id);
+  store.inProgress={seq:{mode:"seq",ids:selected,idx:0}};
+  saveStore(store);
+  session=store.inProgress.seq;
+  render();
+}
 
-  function updateMenuLabels() {
-    const store = loadStore();
-    const per = challengesPerRound();
+function commitSeq(){
+  const store=loadStore();
+  if(!store.inProgress?.seq) return;
+  const count=store.inProgress.seq.ids.length;
+  store.seqIndex=(store.seqIndex||0)+count;
+  if(store.seqIndex>=items.length) store.seqIndex=0;
+  store.inProgress.seq=null;
+  saveStore(store);
+}
 
-    const btnSeq = document.getElementById("btnSeq");
-    const btnRand = document.getElementById("btnRand");
+function startRand(){
+  const store=loadStore();
+  const stats=store.stats||{};
+  const pool=[...items];
 
-    const seqMid = store.inProgress?.seq ? "（途中あり）" : "";
-    const randMid = store.inProgress?.rand ? "（途中あり）" : "";
+  pool.sort((a,b)=>{
+    const sa=stats[a.id]?.randShown||0;
+    const sb=stats[b.id]?.randShown||0;
+    if(sa!==sb) return sa-sb;
+    const wa=stats[a.id]?.wrong>0?0:1;
+    const wb=stats[b.id]?.wrong>0?0:1;
+    if(wa!==wb) return wa-wb;
+    return Math.random()-0.5;
+  });
 
-    btnSeq.textContent = `全部順番（${per}回で１周。現在${store.seqChallenge}回）${seqMid}`;
-    btnRand.textContent = `全部ランダム（${per}回で１周。現在${store.randChallenge}回）${randMid}`;
-  }
+  const selected=pool.slice(0,Math.min(PAGE_SIZE,pool.length)).map(x=>x.id);
 
-  // ---- 全部順番：途中なら再開 / 完走で確定 ----
-  function startSeqChallenge() {
-    const store = loadStore();
-    const n = items.length;
+  selected.forEach(id=>{
+    statFor(store,id).randShown++;
+  });
+  saveStore(store);
 
-    // 途中があれば再開
-    if (store.inProgress?.seq) {
-      const p = store.inProgress.seq;
-      session = {
-        mode: "seq",
-        ids: p.ids,
-        idx: p.idx || 0,
-        total: p.ids.length,
-        answered: false
-      };
-      renderQuestion();
-      updateMenuLabels();
-      return;
-    }
+  session={mode:"rand",ids:selected,idx:0};
+  render();
+}
 
-    // 新規セット（回数は増やさない）
-    const start = store.seqIndex;
-    const end = Math.min(start + PAGE_SIZE, n);
-    const selected = items.slice(start, end).map(x => x.id);
+function render(){
+  const main=document.getElementById("main");
+  const q=byId.get(session.ids[session.idx]);
+  main.innerHTML=`
+  <div>進行状況：${session.idx+1}/${session.ids.length}</div>
+  <div class="jp">${q.jp}</div>
+  <div class="answer-area">
+    <input id="ans">
+    <button class="action" id="check">判定</button>
+  </div>
+  <div id="res" class="result"></div>
+  `;
+  document.getElementById("check").onclick=check;
+}
 
-    store.inProgress.seq = {
-      ids: selected,
-      idx: 0,
-      startIndex: start,
-      endIndex: end,
-      willWrap: (end >= n),
-      roundAtStart: store.seqRound
-    };
-    saveStore(store);
-
-    session = {
-      mode: "seq",
-      ids: selected,
-      idx: 0,
-      total: selected.length,
-      answered: false
-    };
-    renderQuestion();
-    updateMenuLabels();
-  }
-
-  function commitSeqIfAny() {
-    const store = loadStore();
-    const p = store.inProgress?.seq;
-    if (!p) return;
-
-    // 完走したのでここで初めて確定
-    store.seqChallenge++;
-    store.seqIndex = p.endIndex;
-
-    // 表示回数は完走時にまとめて加算
-    p.ids.forEach(id => statFor(store, id).seqShown++);
-
-    if (p.willWrap) {
-      store.seqIndex = 0;
-      store.seqRound++;
-    }
-
-    store.inProgress.seq = null;
-    saveStore(store);
-  }
-
-  // ---- 全部ランダム：開始時は“計画だけ”。完走で確定 ----
-  function planRandSetForChallenge(store) {
-    const currentRound = store.randRound;
-
-    let candidates = items
-      .filter(x => statFor(store, x.id).lastRandRoundSeen !== currentRound)
-      .map(x => x.id);
-
-    let useRound = currentRound;
-    let advancedRoundTo = null;
-
-    if (candidates.length === 0) {
-      useRound = currentRound + 1;
-      advancedRoundTo = useRound;
-      candidates = items
-        .filter(x => statFor(store, x.id).lastRandRoundSeen !== useRound)
-        .map(x => x.id);
-    }
-
-    const count = Math.min(PAGE_SIZE, candidates.length);
-
-    const randKey = new Map();
-    candidates.forEach(id => randKey.set(id, Math.random()));
-
-    candidates.sort((a, b) => {
-      const sa = statFor(store, a);
-      const sb = statFor(store, b);
-
-      if (sa.randShown !== sb.randShown) return sa.randShown - sb.randShown;
-      if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong;
-      return (randKey.get(a) ?? 0) - (randKey.get(b) ?? 0);
-    });
-
-    const selected = candidates.slice(0, count);
-    return { selected, useRound, advancedRoundTo };
-  }
-
-  function startRandChallenge() {
-    const store = loadStore();
-
-    // 途中があれば再開
-    if (store.inProgress?.rand) {
-      const p = store.inProgress.rand;
-      session = {
-        mode: "rand",
-        ids: p.ids,
-        idx: p.idx || 0,
-        total: p.ids.length,
-        answered: false
-      };
-      renderQuestion();
-      updateMenuLabels();
-      return;
-    }
-
-    const plan = planRandSetForChallenge(store);
-
-    store.inProgress.rand = {
-      ids: plan.selected,
-      idx: 0,
-      useRound: plan.useRound,
-      advancedRoundTo: plan.advancedRoundTo
-    };
-    saveStore(store);
-
-    session = {
-      mode: "rand",
-      ids: plan.selected,
-      idx: 0,
-      total: plan.selected.length,
-      answered: false
-    };
-    renderQuestion();
-    updateMenuLabels();
-  }
-
-  function commitRandIfAny() {
-    const store = loadStore();
-    const p = store.inProgress?.rand;
-    if (!p) return;
-
-    store.randChallenge++;
-
-    if (typeof p.advancedRoundTo === "number") {
-      store.randRound = p.advancedRoundTo;
-    }
-
-    p.ids.forEach(id => {
-      const s = statFor(store, id);
-      s.randShown++;
-      s.lastRandRoundSeen = p.useRound;
-    });
-
-    store.inProgress.rand = null;
+function check(){
+  const store=loadStore();
+  const id=session.ids[session.idx];
+  const q=byId.get(id);
+  const user=normalize(document.getElementById("ans").value);
+  const accept=[q.model,...q.alts].map(normalize);
+  const ok=accept.includes(user);
+  if(!ok && session.mode!=="wrongRand"){
+    statFor(store,id).wrong++;
     saveStore(store);
   }
+  document.getElementById("res").innerHTML=
+    `<div class="${ok?"ok":"ng"}">${ok?"正解":"不正解"}</div>
+     <div>模範解答：${q.model}</div>
+     <button class="action" onclick="nextQ()">次へ</button>`;
+}
 
-  // ---- 誤答ランダム / 苦手10（従来通り：回数やinProgressとは無関係） ----
-  function startWrongRandChallenge() {
-    const store = loadStore();
+window.nextQ=function(){
+  session.idx++;
+  if(session.idx>=session.ids.length){
+    if(session.mode==="seq") commitSeq();
+    session=null;
+    document.getElementById("main").innerHTML="終了しました。";
+    updateSeqLabel();
+    return;
+  }
+  render();
+}
 
-    const pool = items
-      .filter(x => statFor(store, x.id).wrong >= 1)
-      .map(x => x.id);
+function renderStats(){
+  const store=loadStore();
+  const rows=items
+    .map(x=>({jp:x.jp,model:x.model,wrong:store.stats[x.id]?.wrong||0}))
+    .filter(x=>x.wrong>0)
+    .sort((a,b)=>b.wrong-a.wrong);
 
-    if (pool.length === 0) {
-      showMessageCard("誤答ランダム", "学習記録に誤答がまだありません。まず「全部順番」または「全部ランダム」で取り組んでください。");
-      return;
-    }
-
-    const count = Math.min(PAGE_SIZE, pool.length);
-    const randKey = new Map();
-    pool.forEach(id => randKey.set(id, Math.random()));
-
-    pool.sort((a, b) => {
-      const sa = statFor(store, a);
-      const sb = statFor(store, b);
-
-      if (sa.wrongRandShown !== sb.wrongRandShown) return sa.wrongRandShown - sb.wrongRandShown;
-      if (sa.wrong !== sb.wrong) return sb.wrong - sa.wrong;
-      return (randKey.get(a) ?? 0) - (randKey.get(b) ?? 0);
-    });
-
-    const selected = pool.slice(0, count);
-    selected.forEach(id => statFor(store, id).wrongRandShown++);
-
-    saveStore(store);
-
-    session = {
-      mode: "wrongRand",
-      ids: selected,
-      idx: 0,
-      total: selected.length,
-      answered: false
-    };
-    renderQuestion();
-    updateMenuLabels();
+  if(rows.length===0){
+    document.getElementById("main").innerHTML="記録なし";
+    return;
   }
 
-  function startHard10Challenge() {
-    const store = loadStore();
+  document.getElementById("main").innerHTML=`
+  <table>
+  <tr><th>回</th><th>英語</th><th>日本語</th></tr>
+  ${rows.map(r=>`<tr><td>${r.wrong}</td><td>${r.model}</td><td>${r.jp}</td></tr>`).join("")}
+  </table>`;
+}
 
-    const withWrong = items
-      .map(x => ({ id: x.id, wrong: statFor(store, x.id).wrong }))
-      .filter(x => x.wrong >= 1);
-
-    if (withWrong.length === 0) {
-      showMessageCard("特に苦手10", "学習記録に誤答がまだありません。まず「全部順番」または「全部ランダム」で取り組んでください。");
-      return;
-    }
-
-    withWrong.sort((a,b) => b.wrong - a.wrong);
-    const top = withWrong.slice(0, 10).map(x => x.id);
-
-    shuffleInPlace(top);
-
-    top.forEach(id => statFor(store, id).hardShown++);
-    saveStore(store);
-
-    session = {
-      mode: "hard10",
-      ids: top,
-      idx: 0,
-      total: top.length,
-      answered: false
-    };
-    renderQuestion();
-    updateMenuLabels();
+document.getElementById("btnSeq").onclick=startSeq;
+document.getElementById("btnRand").onclick=startRand;
+document.getElementById("btnStats").onclick=renderStats;
+document.getElementById("btnReset").onclick=()=>{
+  if(confirm("このページの記録をすべてリセットしますか？")){
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
   }
+};
+document.getElementById("btnTop").onclick=()=>location.href=TOP_URL;
 
-  function shuffleInPlace(arr) {
-    for (let i = arr.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-  }
-
-  // ========= 表示 =========
-  function showMessageCard(title, body) {
-    const main = document.getElementById("main");
-    main.innerHTML = `
-      <div class="row">
-        <span class="tag">${escapeHtml(title)}</span>
-      </div>
-      <p class="note" style="margin-top:10px; white-space:pre-wrap;">${escapeHtml(body)}</p>
-    `;
-  }
-
-  function renderQuestion() {
-    if (!session || session.ids.length === 0) {
-      showMessageCard("準備中", "メニューから出題形式を選んでください。");
-      return;
-    }
-    const id = session.ids[session.idx];
-    const q = byId.get(id);
-
-    const main = document.getElementById("main");
-    const modeLabel =
-      session.mode === "seq" ? "全部順番" :
-      session.mode === "rand" ? "全部ランダム" :
-      session.mode === "wrongRand" ? "誤答ランダム" : "特に苦手10";
-
-    main.innerHTML = `
-      <div class="row">
-        <span class="tag">${modeLabel}</span>
-        <div class="progress">進行状況：${session.idx + 1}／${session.total}問中</div>
-      </div>
-
-      <div class="jp">${escapeHtml(q.jp)}</div>
-
-      <div class="answer-area">
-        <input id="answerInput" type="text" autocomplete="off" placeholder="ここに英作文を入力" />
-        <button id="checkBtn" class="action">判定</button>
-      </div>
-
-      <div id="resultBox" class="result" style="display:none;"></div>
-    `;
-
-    const input = document.getElementById("answerInput");
-    const btn = document.getElementById("checkBtn");
-
-    input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") btn.click();
-    });
-
-    btn.addEventListener("click", () => checkAnswer());
-
-    setTimeout(() => input.focus(), 0);
-  }
-
-  function checkAnswer() {
-    if (!session || session.answered) return;
-
-    const id = session.ids[session.idx];
-    const q = byId.get(id);
-
-    const inputEl = document.getElementById("answerInput");
-    const btn = document.getElementById("checkBtn");
-    const resultBox = document.getElementById("resultBox");
-
-    const userRaw = inputEl.value;
-    const userN = normalizeAnswer(userRaw);
-
-    const accept = [q.model, ...(q.altsArr || [])].map(normalizeAnswer);
-    const isCorrect = accept.includes(userN);
-
-    // 学習記録に加えるのは seq / rand のみ（指定どおり）
-    if (!isCorrect) {
-      if (session.mode === "seq" || session.mode === "rand") {
-        const store = loadStore();
-        statFor(store, id).wrong++;
-        saveStore(store);
-      }
-    }
-
-    inputEl.disabled = true;
-    btn.disabled = true;
-
-    const judge = isCorrect ? "正解" : "不正解";
-    const judgeClass = isCorrect ? "ok" : "ng";
-
-    resultBox.style.display = "block";
-    resultBox.innerHTML = `
-      <div class="judge ${judgeClass}">${judge}</div>
-      <div class="model"><strong>模範解答：</strong> ${escapeHtml(q.model)}</div>
-      ${q.altsArr && q.altsArr.length ? `<div class="note">別解：${escapeHtml(q.altsArr.join(" / "))}</div>` : ``}
-      <div style="margin-top:10px;">
-        <button id="nextBtn" class="action">次の問題へ</button>
-      </div>
-    `;
-
-    document.getElementById("nextBtn").addEventListener("click", () => {
-      nextQuestion();
-    });
-
-    session.answered = true;
-  }
-
-  function nextQuestion() {
-    if (!session) return;
-    session.idx++;
-
-    // ★途中セッションのidxを保存（seq / rand のみ）
-    {
-      const store = loadStore();
-      if (session.mode === "seq" && store.inProgress?.seq) {
-        store.inProgress.seq.idx = session.idx;
-        saveStore(store);
-      }
-      if (session.mode === "rand" && store.inProgress?.rand) {
-        store.inProgress.rand.idx = session.idx;
-        saveStore(store);
-      }
-    }
-
-    if (session.idx >= session.ids.length) {
-      // ★完走したので、ここでだけ回数・進捗を確定
-      if (session.mode === "seq") commitSeqIfAny();
-      if (session.mode === "rand") commitRandIfAny();
-
-      const title =
-        session.mode === "seq" ? "全部順番" :
-        session.mode === "rand" ? "全部ランダム" :
-        session.mode === "wrongRand" ? "誤答ランダム" : "特に苦手10";
-
-      showMessageCard(title, "このチャレンジは終了しました。\nメニューから次の出題を選んでください。");
-      session = null;
-      updateMenuLabels();
-      return;
-    }
-
-    session.answered = false;
-    renderQuestion();
-  }
-
-  function renderStats() {
-    const store = loadStore();
-
-    const rows = items
-      .map(x => {
-        const s = statFor(store, x.id);
-        return { wrong: s.wrong, model: x.model, jp: x.jp };
-      })
-      .filter(x => x.wrong >= 1)
-      .sort((a,b) => b.wrong - a.wrong);
-
-    const main = document.getElementById("main");
-
-    if (rows.length === 0) {
-      main.innerHTML = `
-        <div class="row">
-          <span class="tag">学習記録</span>
-        </div>
-        <p class="note" style="margin-top:10px;">まだ記録がありません。「全部順番」または「全部ランダム」で間違えると記録されます。</p>
-      `;
-      return;
-    }
-
-    const tbody = rows.map(r => `
-      <tr>
-        <td class="num">${r.wrong}</td>
-        <td>${escapeHtml(r.model)}</td>
-        <td>${escapeHtml(r.jp)}</td>
-      </tr>
-    `).join("");
-
-    main.innerHTML = `
-      <div class="row">
-        <span class="tag">学習記録</span>
-        <div class="progress">（「全部順番」「全部ランダム」での誤答のみ）</div>
-      </div>
-
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:70px; text-align:right;">回</th>
-              <th>英語</th>
-              <th>日本語</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tbody}
-          </tbody>
-        </table>
-      </div>
-    `;
-  }
-
-  function escapeHtml(s) {
-    return String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
-  }
-
-  // ========= イベント =========
-  function bindMenu() {
-    document.getElementById("btnSeq").addEventListener("click", () => startSeqChallenge());
-    document.getElementById("btnRand").addEventListener("click", () => startRandChallenge());
-    document.getElementById("btnWrongRand").addEventListener("click", () => startWrongRandChallenge());
-    document.getElementById("btnHard10").addEventListener("click", () => startHard10Challenge());
-    document.getElementById("btnStats").addEventListener("click", () => { session = null; renderStats(); updateMenuLabels(); });
-    document.getElementById("btnTop").addEventListener("click", () => { location.href = TOP_URL; });
-  }
-
-  // ========= 起動 =========
-  (async function boot(){
-    const main = document.getElementById("main");
-    main.innerHTML = `<div class="note">読み込み中…</div>`;
-
-    try{
-      await loadData();
-
-      // statsの初期化（存在しないidに備える）
-      const store = loadStore();
-      items.forEach(x => statFor(store, x.id));
-      saveStore(store);
-
-      bindMenu();
-      updateMenuLabels();
-
-      showMessageCard("準備完了", "メニューから出題形式を選んでください。");
-    } catch(e){
-      bindMenu();
-      updateMenuLabels();
-      showMessageCard("エラー", (e && e.message) ? e.message : "読み込みに失敗しました。");
-    }
-  })();
+(async function(){
+  await loadData();
+  updateSeqLabel();
+})();
 })();
 </script>
 </body>
