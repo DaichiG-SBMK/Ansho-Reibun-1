@@ -219,11 +219,9 @@ const header = splitLine(rows[0]).map(s => s.trim());
 }
 
 function updateSeqLabel(){
-  const store=loadStore();
-  const per=Math.ceil(items.length/PAGE_SIZE);
-  const mid=store.inProgress?.seq?"（途中あり）":"";
-  document.getElementById("btnSeq").textContent=
-    `全部順番（${per}回で１周）${mid}`;
+  const per = Math.ceil(items.length / PAGE_SIZE);
+  document.getElementById("btnSeq").textContent =
+    `全部順番（${per}回で１周）`;
 }
 
 function startSeq(){
