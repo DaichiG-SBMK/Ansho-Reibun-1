@@ -244,6 +244,10 @@ function render(){
   <div id="res" class="result"></div>
   `;
   document.getElementById("check").onclick=check;
+const ans = document.getElementById("ans");
+ans.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") document.getElementById("check").click();
+});
 }
 
 function check(){
@@ -260,7 +264,16 @@ function check(){
   document.getElementById("res").innerHTML=
     `<div class="${ok?"ok":"ng"}">${ok?"正解":"不正解"}</div>
      <div>模範解答：${q.model}</div>
-     <button class="action" onclick="nextQ()">次へ</button>`;
+     <button class="action" id="nextBtn" onclick="nextQ()">次へ</button>`;
+
+const nextBtn = document.getElementById("nextBtn");
+nextBtn.focus();
+document.addEventListener("keydown", function handler(e){
+  if (e.key === "Enter") {
+    nextBtn.click();
+    document.removeEventListener("keydown", handler);
+  }
+}, { once: true });
 }
 
 window.nextQ=function(){
