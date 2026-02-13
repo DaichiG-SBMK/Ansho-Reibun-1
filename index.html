@@ -264,10 +264,15 @@ function check(){
     statFor(store,id).wrong++;
     saveStore(store);
   }
-  document.getElementById("res").innerHTML=
-    `<div class="${ok?"ok":"ng"}">${ok?"正解":"不正解"}</div>
-     <div>模範解答：${q.model}</div>
-     <button class="action" id="nextBtn" onclick="nextQ()">次へ</button>`;
+const altsText = (q.alts && q.alts.length)
+  ? `<div style="font-size:13px; color:#6b7280; margin-top:6px;">別解：${q.alts.join(" / ")}</div>`
+  : "";
+
+document.getElementById("res").innerHTML=
+  `<div class="${ok?"ok":"ng"}">${ok?"正解":"不正解"}</div>
+   <div>模範解答：${q.model}</div>
+   ${altsText}
+   <button class="action" id="nextBtn" onclick="nextQ()">次へ</button>`;
 
 const nextBtn = document.getElementById("nextBtn");
 
