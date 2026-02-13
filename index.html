@@ -310,7 +310,11 @@ function render(){
   <div>進行状況：${session.idx+1}/${session.ids.length}</div>
   <div class="jp">${q.jp}</div>
   <div class="answer-area">
-    <input id="ans">
+    <input id="ans"
+       autocomplete="off"
+       autocorrect="off"
+       autocapitalize="off"
+       spellcheck="false">
     <button class="action" id="check">判定</button>
   </div>
   <div id="res" class="result"></div>
