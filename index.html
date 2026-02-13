@@ -157,15 +157,41 @@ async function loadData(){
   if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
 
   const rows=text.split(/\r?\n/).filter(r=>r.trim());
-  const delim = rows[0].includes("\t") ? "\t" : ",";
-  const header = rows[0].split(delim);
+const delim = rows[0].includes("\t") ? "\t" : ",";
+
+function splitLine(line){
+  const out = [];
+  let cur = "";
+  let inQuotes = false;
+
+  for (let i = 0; i < line.length; i++){
+    const c = line[i];
+
+    if (inQuotes){
+      if (c === '"'){
+        if (line[i + 1] === '"'){ cur += '"'; i++; }
+        else inQuotes = false;
+      } else {
+        cur += c;
+      }
+    } else {
+      if (c === '"') inQuotes = true;
+      else if (c === delim){ out.push(cur); cur = ""; }
+      else cur += c;
+    }
+  }
+  out.push(cur);
+  return out;
+}
+
+const header = splitLine(rows[0]).map(s => s.trim());
   const idI=header.indexOf("id");
   const jpI=header.indexOf("jp");
   const mI=header.indexOf("model");
   const aI=header.indexOf("alts");
 
   for(let i=1;i<rows.length;i++){
-    const cols = rows[i].split(delim);
+    const cols = splitLine(rows[i]);
     if(!cols[idI]) continue;
     const alts=(cols[aI]||"").split("|").filter(Boolean);
     items.push({id:cols[idI],jp:cols[jpI],model:cols[mI],alts});
@@ -252,6 +278,7 @@ ans.addEventListener("keydown", (e) => {
     document.getElementById("check").click();
   }
 });
+setTimeout(() => ans.focus(), 0);
 }
 
 function check(){
