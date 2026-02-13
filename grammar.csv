@@ -11,24 +11,24 @@ id,jp,model,alts
 10,エミリーは日本語をじょうずに話せますか．,Can Emily speak Japanese well?,
 11,(エミリーは日本語をじょうずに話せますか．) はい，話せます．,"Yes, she can.",
 12,(エミリーは日本語をじょうずに話せますか．) いいえ，話せません．,"No, she can’t.","No, she cannot."
-13,アンは電車通学ですか．,Does Ann go to school by train?,
+13,アンは電車通学ですか．,Does Ann go to school by train?,Does Ann come to school by train?
 14,(アンは電車通学ですか．)はい，そうです．,"Yes, she does.",
 15,(アンは電車通学ですか．)いいえ，ちがいます．,"No, she doesn’t.","No, she does not."
-16,ニューヨークには行かなかったのですか．,Didn’t you visit New York?,
+16,ニューヨークには行かなかったのですか．,Didn’t you visit New York?,Didn’t you go to New York?
 17,(ニューヨークには行かなかったのですか．) いいえ，行きました．,"Yes, I did.",
 18,(ニューヨークには行かなかったのですか．) はい，行きませんでした．,"No, I didn’t.","No, I did not."
 19,飛行機で行きますか，電車で行きますか．― 電車で行きます．,Are you going by air or by train? By train.,Are you going by air or by train? I’m going by train.
-20,だれがこの絵を描いたのですか．― ジョンが描きました．,Who painted this picture? John did.,
+20,だれがこの絵を描いたのですか．― ジョンが描きました．,Who painted this picture? John did.,Who drew this picture? John did.|drawは線画
 21,誕生日に何が欲しいの？ ―  パソコンが欲しいな．,What do you want for your birthday? I want a PC.,What do you want for your birthday? I want a computer.
 22,いつ戻ってきますか．― 5時までには戻ってきます．,When will you be back? By five.,When will you be back? I’ll be back by five.
 23,今日はとても寒いですね．― ええ，そうですね．,"It is very cold today, isn’t it? Yes, it is.",
 24,トムは数学が好きではないんですね．― いいえ，好きですよ．,"Tom doesn’t like math, does he? Yes, he does.",
 25,私の言うことを注意して聞きなさい．,Listen to me carefully.,
 26,気をつけて！  カップがとても熱いから．,Be careful! The cup is very hot.,
-27,あきらめてはいけません．もう一度やってごらん．,Don’t give up. Try it again.,
-28,どうかそんなに騒がないでください．,"Don’t be so noisy, please.",
+27,あきらめてはいけません．もう一度やってごらん．,Don’t give up. Try it again.,Don’t give up. Try again.|Don’t give up. Try one more time.|Don’t give up. Try it one more time.
+28,どうかそんなに騒がないでください．,"Don’t be so noisy, please.","Please don't be so noisy.|Don't be so noisy, will you?"
 29,テニスをしようよ．,Let’s play tennis.,
 30,(テニスをしようよ．)うん，やろう．(1語),Sure.,
 31,(テニスをしようよ．)ごめん，できないんだ．,"Sorry, I can’t.",
-32,このステーキはなんて大きいんだろう．,How big this steak is!,
-33,彼はなんて水泳がじょうずなんだろう．,What a good swimmer he is!,
+32,このステーキはなんて大きいんだろう！,How big this steak is!,
+33,彼はなんて水泳がじょうずなんだろう！（彼はなんていい水泳選手なんだろう！）,What a good swimmer he is!,
